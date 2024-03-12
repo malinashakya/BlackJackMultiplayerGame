@@ -65,38 +65,46 @@ public class BlackJackMultiplayerGame {
         return player.balance;
     }
 
-    static void displayHistory(GameRecord[] records, int rounds, Player[] players, int numPlayers) {
-        try (Writer writer = new FileWriter("game_history.txt")) {
-            writer.write("Game History:\n");
-            System.out.println("Game History:");
-            int count = 0, j = 0;
-            for (int i = 0; i < rounds; i++) {
-                if (i % numPlayers == 0) {
-                    count++;
-                }
-                j++;
-                if (i % 2 == 0) {
-                    j = 0;
-                }
-                if (players[j].balance == 0) {
-                    String message = "Player " + players[j].name + " is out of the game";
-                    System.out.println(message);
-                    writer.write(message + "\n");
-                } else {
-                    String message = "Player " + players[j].name + " - Round " + count + ": Cards "
-                            + display(records[i].card1) + ", " + display(records[i].card2) + ", "
-                            + display(records[i].card3) + " | Bet: " + records[i].betPoint + " | Result: "
-                            + records[i].result + " | Balance: " + records[i].balance;
-                    System.out.println(message);
-                    writer.write(message + "\n");
-                }
+static void displayHistory(GameRecord[] records, int rounds, Player[] players, int numPlayers) {
+    try (Writer writer = new FileWriter("game_history.txt")) {
+        writer.write("Name,Round,Card1,Card2,Card3,Bet,Result,Balance\n");
+        System.out.println("Name,Round,Card1,Card2,Card3,Bet,Result,Balance");
+        int count = 0, j = 0;
+        for (int i = 0; i < rounds; i++) {
+            if (i % numPlayers == 0) {
+                count++;
             }
-            System.out.println("Game history has been saved to game_history.txt");
-        } catch (IOException e) {
-            System.err.println("Error writing game history to file: " + e.getMessage());
+            j++;
+            if (i % 2 == 0) {
+                j = 0;
+            }
+            if (players[j].balance == 0) {
+                String message = players[j].name + "," + count + ","
+                        + display(records[i].card1) + ","
+                        + display(records[i].card2) + ","
+                        + display(records[i].card3) + ","
+                        + records[i].betPoint + ","
+                        + records[i].result + ","
+                        + records[i].balance;
+                System.out.println(message);
+                writer.write(message + "\n");
+            } else {
+                String message = players[j].name + "," + count + ","
+                        + display(records[i].card1) + ","
+                        + display(records[i].card2) + ","
+                        + display(records[i].card3) + ","
+                        + records[i].betPoint + ","
+                        + records[i].result + ","
+                        + records[i].balance;
+                System.out.println(message);
+                writer.write(message + "\n");
+            }
         }
+        System.out.println("Game history has been saved to game_history.txt");
+    } catch (IOException e) {
+        System.err.println("Error writing game history to file: " + e.getMessage());
     }
-
+}
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Do you want to resume the previous game? (y/n): ");
