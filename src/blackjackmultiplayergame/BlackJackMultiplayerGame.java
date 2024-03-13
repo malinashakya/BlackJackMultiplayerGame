@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
 
 public class BlackJackMultiplayerGame {
 
@@ -65,46 +66,58 @@ public class BlackJackMultiplayerGame {
         return player.balance;
     }
 
-static void displayHistory(GameRecord[] records, int rounds, Player[] players, int numPlayers) {
-    try (Writer writer = new FileWriter("game_history.txt")) {
-        writer.write("Name,Round,Card1,Card2,Card3,Bet,Result,Balance\n");
-        System.out.println("Name,Round,Card1,Card2,Card3,Bet,Result,Balance");
-        int count = 0, j = 0;
-        for (int i = 0; i < rounds; i++) {
-            if (i % numPlayers == 0) {
-                count++;
+    static void displayHistory(GameRecord[] records, int rounds, Player[] players, int numPlayers) {
+        try (Writer writer = new FileWriter("game_history.txt")) {
+            writer.write("Name,Round,Card1,Card2,Card3,Bet,Result,Balance\n");
+            System.out.println("Name,Round,Card1,Card2,Card3,Bet,Result,Balance");
+            int count = 0, j = 0;
+            for (int i = 0; i < rounds; i++) {
+                if (i % numPlayers == 0) {
+                    count++;
+                }
+                j++;
+                if (i % numPlayers == 0) {
+                    j = 0;
+                }
+                if (players[j].balance == 0) {
+                    String message = players[j].name + "," + count + ","
+                            + display(records[i].card1) + ","
+                            + display(records[i].card2) + ","
+                            + display(records[i].card3) + ","
+                            + records[i].betPoint + ","
+                            + records[i].result + ","
+                            + records[i].balance;
+                    System.out.println(message);
+                    writer.write(message + "\n");
+                } else {
+                    String message = players[j].name + "," + count + ","
+                            + display(records[i].card1) + ","
+                            + display(records[i].card2) + ","
+                            + display(records[i].card3) + ","
+                            + records[i].betPoint + ","
+                            + records[i].result + ","
+                            + records[i].balance;
+                    System.out.println(message);
+                    writer.write(message + "\n");
+                }
             }
-            j++;
-            if (i % 2 == 0) {
-                j = 0;
-            }
-            if (players[j].balance == 0) {
-                String message = players[j].name + "," + count + ","
-                        + display(records[i].card1) + ","
-                        + display(records[i].card2) + ","
-                        + display(records[i].card3) + ","
-                        + records[i].betPoint + ","
-                        + records[i].result + ","
-                        + records[i].balance;
-                System.out.println(message);
-                writer.write(message + "\n");
-            } else {
-                String message = players[j].name + "," + count + ","
-                        + display(records[i].card1) + ","
-                        + display(records[i].card2) + ","
-                        + display(records[i].card3) + ","
-                        + records[i].betPoint + ","
-                        + records[i].result + ","
-                        + records[i].balance;
-                System.out.println(message);
-                writer.write(message + "\n");
-            }
+            System.out.println("Game history has been saved to game_history.txt");
+        } catch (IOException e) {
+            System.err.println("Error writing game history to file: " + e.getMessage());
         }
-        System.out.println("Game history has been saved to game_history.txt");
-    } catch (IOException e) {
-        System.err.println("Error writing game history to file: " + e.getMessage());
     }
-}
+
+//      static int countUniqueNames(ArrayList<String> names) {
+//        ArrayList<String> uniqueNames = new ArrayList<>();
+//
+//        for (String name : names) {
+//            if (!uniqueNames.contains(name)) {
+//                uniqueNames.add(name);
+//            }
+//        }
+//
+//        return uniqueNames.size();
+//    }
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Do you want to resume the previous game? (y/n): ");
@@ -112,9 +125,36 @@ static void displayHistory(GameRecord[] records, int rounds, Player[] players, i
         if (resumeResponse == 'y') {
             try (BufferedReader reader = new BufferedReader(new FileReader("game_history.txt"))) {
                 String line;
+                  int round=0;
+                boolean startReading = false;
+                ArrayList<String> uniqueNames = new ArrayList<>(); // ArrayList to store unique player names
+
                 while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
+                    if (line.startsWith("Name,Round,Card1,Card2,Card3,Bet,Result,Balance")) {
+                        startReading = true;
+                        continue;
+                    }
+                    if (startReading) {
+                      
+                        String[] parts = line.split(",");
+                        if (parts.length == 8) {
+                            String playerName = parts[0];
+                            round=Integer.parseInt(parts[1]);
+                            // Add the player name to the ArrayList only if it's not already present
+                            if (!uniqueNames.contains(playerName)) {
+                                uniqueNames.add(playerName);
+                            }
+                        }
+                    }
                 }
+                System.out.println("Unique player names:");
+                for (String name : uniqueNames) {
+                    System.out.println(name);
+                }
+
+                // Count unique names
+                int uniqueCount = uniqueNames.size();
+                System.out.println("Number of unique players: " + uniqueCount+ "round played "+round);
             } catch (IOException e) {
                 System.err.println("Error reading game history: " + e.getMessage());
             }
